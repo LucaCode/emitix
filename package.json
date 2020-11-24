@@ -1,0 +1,39 @@
+{
+  "name": "emitix",
+  "version": "0.0.1",
+  "description": "",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "files": [
+    "dist/**/*"
+  ],
+  "devDependencies": {
+    "typescript": "^3.7.5",
+    "gulp": "4.0.2",
+    "gulp-optimize-js": "1.1.0",
+    "gulp-terser": "1.2.0",
+    "gulp-typescript": "^5.0.1",
+    "del": "^5.1.0",
+    "ts-node": "^8.0.3",
+    "mocha": "7.0.1",
+    "@types/mocha": "^7.0.2"
+  },
+  "scripts": {
+    "build": "gulp build",
+    "prepublishOnly": "npm run build",
+    "test": "mocha --exit -r ts-node/register test/**/*.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LucaCode/emitix.git"
+  },
+  "author": {
+    "name": "Luca Scaringella",
+    "email": "lucacode1@gmail.com",
+    "url": "https://luca.scaringella.de"
+  },
+  "bugs": {
+    "url": "https://github.com/LucaCode/emitix/issues"
+  },
+  "homepage": "https://github.com/LucaCode/emitix#readme"
+}
