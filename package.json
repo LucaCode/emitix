@@ -1,7 +1,7 @@
 {
   "name": "emitix",
   "version": "0.0.1",
-  "description": "",
+  "description": "Fast, powerful, modern and lightweight EventEmitter.",
   "license": "MIT",
   "main": "dist/index.js",
   "files": [
