@@ -10,13 +10,8 @@ function clean() {
 }
 
 function compile() {
-    return src('src/**/*.ts')
+    return src('./*.ts')
         .pipe(typescript.createProject('tsconfig.json')())
-        .pipe(dest(outputFolder));
-}
-
-function copyAssets() {
-    return src(['src/**/*','!src/**/*.ts','!src/**/*.scss'])
         .pipe(dest(outputFolder));
 }
 
@@ -26,12 +21,11 @@ function optimize() {
         .pipe(dest(outputFolder));
 }
 
-const build = series(clean,parallel(compile,copyAssets),optimize);
+const build = series(clean,compile,optimize);
 
 module.exports = {
     clean,
     compile,
-    copyAssets,
     build,
     default: build
 };
