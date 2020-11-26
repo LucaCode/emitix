@@ -4,12 +4,38 @@ GitHub: LucaCode
 Copyright(c) Luca Scaringella
  */
 
-type Event<T extends any[]> = (...args: T) => any;
+type ListenerFunction<T extends any[]> = (...args: T) => any;
 type Events = {[key: string]: any[]};
 
-const enum EventPrefix {
-    On,
-    Once
+function Events() {}
+
+class Listener {
+    readonly fn: ListenerFunction<any>;
+    readonly once: boolean;
+    constructor(fn: ListenerFunction<any>, once?: boolean) {
+        this.fn = fn;
+        this.once = once || false;
+    }
+}
+
+function addEvent(emitter: EventEmitter,event: string, listener: Listener) {
+    if (!emitter._events[event]) emitter._events[event] = listener, emitter._eventCount++;
+    else if (Array.isArray(emitter._events[event])) (emitter._events[event] as any[]).push(listener)
+    else emitter._events[event] = [emitter._events[event] as Listener,listener];
+}
+
+function rmOnceListener(emitter: EventEmitter, event: string, listener: Listener) {
+    const lis: Listener | Listener[] | undefined | any = emitter._events[event];
+    if(!lis) return;
+    else if(lis.fn && lis == listener) clearEvent(emitter,event)
+    else {
+        for (let i = 0; i < lis.length; i++) if (lis[i] == listener) (lis as ListenerFunction<any>[]).splice(i, 1);
+        if(lis.length === 0) clearEvent(emitter,event)
+    }
+}
+
+function clearEvent(emitter: EventEmitter, event: string) {
+    --emitter._eventCount === 0 ? (emitter._events = new Events(), emitter._eventCount = 0) : delete emitter._events[event];
 }
 
 export default class EventEmitter<T extends Events = any> {
@@ -24,7 +50,15 @@ export default class EventEmitter<T extends Events = any> {
         err.name = 'Timeout';
         return err;
     }
-    private _events: Record<any, Event<any> | Event<any>[]> = {};
+
+    /**
+     * @internal
+     */
+    _events: Record<any, Listener | Listener[]> = new Events();
+    /**
+     * @internal
+     */
+    _eventCount: number = 0;
 
     /**
      * @description
@@ -42,42 +76,17 @@ export default class EventEmitter<T extends Events = any> {
      * @param event
      * @param listener
      */
-    public off<E extends keyof T>(event: E, listener: Event<T[E]>)
-    /**
-     * Removes a specific listener from all events.
-     * @param listener
-     */
-    public off(listener: Event<any>)
-    public off(a1?: string | Event<any>, a2?: Event<any>) {
-        if(typeof a1 === 'string') {
-            if(a2) {
-                EventEmitter._rmFnInEvent(this._events,EventPrefix.On + a1,a2);
-                EventEmitter._rmFnInEvent(this._events,EventPrefix.Once + a1,a2);
-            }
-            else {
-                delete this._events[EventPrefix.On + a1];
-                delete this._events[EventPrefix.Once + a1];
-            }
-        }
-        else if(a1) this._rmFnInEvents(this._events,a1);
-        else this._events = {};
-    }
-
-    private _rmFnInEvents<E extends keyof T>(events: Record<any, Event<any> | Event<any>[]>,fn: Event<any>) {
-        const keys = Object.keys(events);
-        const len = keys.length;
-        for(let i = 0; i < len; i++) EventEmitter._rmFnInEvent(events,keys[i],fn);
-    }
-
-    private static _rmFnInEvent(events: Record<any, Event<any> | Event<any>[]>, event: string, fn: Event<any>) {
-        const fns: Event<any> | Event<any>[] | undefined = events[event];
-        if(!fns) return;
-        else if(typeof fns === 'function') {if(fns === fn) return delete events[event];}
+    public off<E extends keyof T>(event: E, listener: ListenerFunction<T[E]>)
+    public off(event?: string, fn?: ListenerFunction<any>) {
+        if(!event) this._events = new Events(), this._eventCount = 0;
+        else if(!this._events[event!]) return;
+        else if(!fn) return clearEvent(this,event)
         else {
-            const index = fns.indexOf(fn);
-            if(index > -1) {
-                fns.splice(index,1)
-                if(fns.length === 0) delete events[event];
+            const lis: Listener | Listener[] | undefined | any = this._events[event];
+            if(lis.fn && lis.fn === fn) return clearEvent(this,event)
+            else {
+                for (let i = 0; i < lis.length; i++) if (lis[i].fn == fn) (lis as ListenerFunction<any>[]).splice(i, 1);
+                if(lis.length === 0) clearEvent(this,event)
             }
         }
     }
@@ -88,9 +97,9 @@ export default class EventEmitter<T extends Events = any> {
      * @param event
      * @param listener
      */
-    public on<E extends keyof T>(event: E, listener: Event<T[E]>)
-    public on<E extends keyof T>(event: E, fn: Event<T[E]>): void {
-        this._addFn(EventPrefix.On + (event as string),fn);
+    public on<E extends keyof T>(event: E, listener: ListenerFunction<T[E]>)
+    public on<E extends keyof T>(event: E, fn: ListenerFunction<T[E]>): void {
+        addEvent(this,event as string,new Listener(fn));
     }
 
     /**
@@ -99,7 +108,7 @@ export default class EventEmitter<T extends Events = any> {
      * @param event
      * @param fn
      */
-    public once<E extends keyof T>(event: E, fn: Event<T[E]>): void
+    public once<E extends keyof T>(event: E, fn: ListenerFunction<T[E]>): void
     /**
      * @description
      * Returns a promise that will be resolved with the arguments when the event has triggered.
@@ -108,27 +117,20 @@ export default class EventEmitter<T extends Events = any> {
      * @param timeout
      */
     public once<E extends keyof T>(event: E, timeout?: number): Promise<T[E]>
-    public once<E extends keyof T>(event: string, v?: Event<T[E]> | number) {
-        event = EventPrefix.Once + (event as string);
-        if(typeof v === 'function') return this._addFn(event,v);
+    public once<E extends keyof T>(event: string, v?: ListenerFunction<T[E]> | number) {
+        if("function" === typeof v){ addEvent(this,event,new Listener(v,true)); return;}
         if(v) return new Promise((res,rej) => {
             let listener;
             const timeout = setTimeout(() => {
-                EventEmitter._rmFnInEvent(this._events,event,listener);
+                rmOnceListener(this,listener,listener);
                 rej(EventEmitter.onceTimeoutErrorCreator());
             },v);
-            this._addFn(event,listener = (...args) => {
+            addEvent(this,event,listener = new Listener(function() {
                 clearTimeout(timeout);
-                res(args)
-            });
+                res(arguments)
+            },true));
         })
-        else return new Promise((res) => this._addFn(event,(...args) => res(args)));
-    }
-
-    private _addFn(event: string, fn: Event<any>): void {
-        if (!this._events[event]) this._events[event] = fn;
-        else if (Array.isArray(this._events[event])) (this._events[event] as any[]).push(fn)
-        else this._events[event] = [this._events[event] as Event<any>,fn];
+        else return new Promise((res) => addEvent(this,event,new Listener(res,true)))
     }
 
     /**
@@ -137,19 +139,42 @@ export default class EventEmitter<T extends Events = any> {
      * @param event
      * @param args
      */
-    public emit<E extends keyof T>(event: E, ...args: T[E]) {
-        EventEmitter._emit(this._events[EventPrefix.On + (event as string)],args);
-        const onceKey = EventPrefix.Once + (event as string);
-        EventEmitter._emit(this._events[onceKey],args);
-        delete this._events[onceKey];
-    }
-
-    private static _emit(fns: Event<any> | Event<any>[],args: any[]) {
-        if(fns)
-            if(typeof fns === 'function') fns(...args);
-            else {
-                const len = fns.length;
-                for(let i = 0; i < len; i++) fns[i](...args);
+    // @ts-ignore
+    public emit<E extends keyof T>(event: E, ...args: T[E])
+    public emit<E extends keyof T>(event: E, a1, a2, a3, a4, a5) {
+        const lis: Listener | Listener[] | undefined | any = this._events[event], len = arguments.length;
+        if(!lis) return;
+        if(lis.fn) {
+            if(lis.once) rmOnceListener(this,event as string,lis);
+            switch (len) {
+                case 1: return lis.fn();
+                case 2: return lis.fn(a1);
+                case 3: return lis.fn(a1,a2);
+                case 4: return lis.fn(a1,a2,a3);
+                case 5: return lis.fn(a1,a2,a3,a4);
+                case 6: return lis.fn(a1,a2,a3,a4,a5);
             }
+            let i = 1, args = new Array(len -1);
+            for (; i < len; i++) args[i - 1] = arguments[i];
+            lis.fn.apply(null, args);
+        }
+        else {
+            let args, j, i = 0;
+            while(i < lis.length) {
+                switch (len) {
+                    case 1: lis[i].fn(); break;
+                    case 2: lis[i].fn(a1); break;
+                    case 3: lis[i].fn(a1,a2); break;
+                    case 4: lis[i].fn(a1,a2,a3); break;
+                    case 5: lis[i].fn(a1,a2,a3,a4); break;
+                    case 6: lis[i].fn(a1,a2,a3,a4,a5); break;
+                    default:
+                        if (!args) for (j = 1, args = new Array(len -1); j < len; j++) args[j - 1] = arguments[j];
+                        lis[i].fn.apply(null, args);
+                }
+                if(lis[i].once) rmOnceListener(this,event as string,lis[i]);
+                else i++;
+            }
+        }
     }
 }
