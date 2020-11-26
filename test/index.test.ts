@@ -6,7 +6,7 @@ Copyright(c) Luca Scaringella
 
 import EventEmitter from "../index";
 
-import { assert, expect } from "chai";
+import { expect } from "chai";
 import * as chai from "chai";
 import * as sinon from 'sinon';
 
@@ -18,35 +18,41 @@ describe('Emitix',() => {
 
     describe('On',() => {
 
-        it('should trigger an on-listener with correct args', () => {
-            const emitter = new EventEmitter<{downloaded: [string,{code: number,data: number[]}]}>();
-            const listener = sinon.fake();
-            emitter.on('downloaded',listener);
+        const testArgs = ([
+            [],
+            [true],
+            [35,242],
+            ['Luca','foo','emitix'],
+            [{color: 'black',model: 'lambo'}],
+            [24,34,23,65],
+            ['a','b','c','d','e'],
+            [{},[],{},[],{},[]],
+            [null,23,undefined,34,24,21,424,34,623,5],
+            [24,34,23,65,34,6,2,4,6,23,6,8,53],
+        ] as any[][]);
 
-            const data: [string,{code: number,data: number[]}] = ['http',{code: 200,data: [1,2,3]}];
+        testArgs.forEach((args,index) => {
+            it(index + '. should trigger an on-listener with correct args', () => {
+                const emitter = new EventEmitter<any>();
+                const listener = sinon.fake();
+                emitter.on('data',listener);
 
-            emitter.emit('downloaded',...data);
-            assert(listener.calledWith(...data));
-
-            data[0] = 'ws';
-
-            emitter.emit('downloaded',...data);
-            assert(listener.calledWith(...data));
-
-            assert(listener.calledTwice);
+                emitter.emit('data',...args);
+                sinon.assert.calledWith(listener,...args);
+            });
         });
 
-        it('should trigger multiple on-listener with correct args', () => {
-            const emitter = new EventEmitter<{newNumber: [number]}>();
-            const listener: sinon.SinonSpy<any>[] = [];
+        testArgs.forEach((args,index) => {
+            it(index + '. should trigger multiple on-listener with correct args', () => {
+                const emitter = new EventEmitter<any>();
+                const listener: sinon.SinonSpy<any>[] = [];
 
-            for(let i = 0; i < 20; i++) listener.push(sinon.fake())
-            listener.forEach(l => emitter.on('newNumber',l))
+                for(let i = 0; i < 20; i++) listener.push(sinon.fake())
+                listener.forEach(l => emitter.on('data',l))
 
-            const data = 12;
-            emitter.emit('newNumber',data);
-
-            listener.forEach(l => assert(l.calledWith(data)));
+                emitter.emit('data',...args);
+                listener.forEach(l => sinon.assert.calledWith(l,...args));
+            });
         });
 
     })
@@ -63,7 +69,7 @@ describe('Emitix',() => {
             emitter.emit('error',new Error());
             emitter.emit('error',new Error());
 
-            assert(listener.calledOnceWith(err));
+            sinon.assert.calledOnceWithExactly(listener,err);
         });
 
         it('should resolve promise-based once-listener', async () => {
@@ -96,18 +102,17 @@ describe('Emitix',() => {
             const data = 'str';
             emitter.emit('newString',data);
 
-            listener.forEach(l => assert(l.calledWith(data)));
+            listener.forEach(l => sinon.assert.calledWith(l,data));
 
             emitter.emit('newString',data);
 
-            listener.forEach(l => assert(l.calledOnce));
+            listener.forEach(l => sinon.assert.calledOnce(l));
         });
     })
 
     describe('Off',() => {
 
         const testData = ([
-            ['should remove the listener',(e,l) => e.off(l)],
             ['should remove the listener from an event',(e,l) => e.off('connect',l)],
             ['should remove all listeners from an event',e => e.off('connect')],
             ['should remove all events',e => e.off()]
@@ -121,7 +126,7 @@ describe('Emitix',() => {
                     emitter.on('connect',listener);
                     removeListener(emitter,listener);
                     emitter.emit('connect');
-                    assert(listener.notCalled);
+                    sinon.assert.notCalled(listener);
                 });
             })
         })
@@ -134,7 +139,7 @@ describe('Emitix',() => {
                     emitter.once('connect',listener);
                     removeListener(emitter,listener);
                     emitter.emit('connect');
-                    assert(listener.notCalled);
+                    sinon.assert.notCalled(listener);
                 });
             })
         })
@@ -151,8 +156,8 @@ describe('Emitix',() => {
 
             emitter.emit('connect');
 
-            assert(listener2.notCalled);
-            assert(listener1.calledOnce);
+            sinon.assert.notCalled(listener2);
+            sinon.assert.calledOnce(listener1);
         })
 
         it('Should remove all added listeners from an event', () => {
@@ -168,8 +173,8 @@ describe('Emitix',() => {
 
             emitter.emit('connect');
 
-            assert(listener1.notCalled);
-            assert(listener2.notCalled);
+            sinon.assert.notCalled(listener1);
+            sinon.assert.notCalled(listener2);
         })
 
         it('Should remove one of two listeners', () => {
@@ -180,12 +185,17 @@ describe('Emitix',() => {
             emitter.on('connect',listener1);
             emitter.on('connect',listener2);
 
-            emitter.off(listener2);
+            emitter.off('connect',listener2);
 
             emitter.emit('connect');
 
-            assert(listener2.notCalled);
-            assert(listener1.calledOnce);
+            sinon.assert.notCalled(listener2);
+            sinon.assert.calledOnce(listener1);
+        })
+
+        it('Should not throw an error when removing a not existing event', () => {
+            const emitter = new EventEmitter<{'connect':[]}>();
+            chai.expect(() => emitter.off('connect')).to.not.throw();
         })
     })
 })
