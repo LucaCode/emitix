@@ -92,6 +92,16 @@ export default class EventEmitter<T extends Events = any> {
     }
 
     /**
+     * Removes all events that matches with the filter.
+     * @param filter
+     */
+    public offEventsFilter(filter: (event: string) => boolean): void {
+        const events = Object.keys(this._events);
+        for(let i = 0, len = events.length; i < len; i++)
+            if(filter(events[i])) clearEvent(this,events[i]);
+    }
+
+    /**
      * @description
      * Adds an on-listener to an event.
      * @param event
