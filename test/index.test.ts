@@ -198,4 +198,30 @@ describe('Emitix',() => {
             chai.expect(() => emitter.off('connect')).to.not.throw();
         })
     })
+
+    describe('offEventsFilter',() => {
+
+        it('should remove all events that matches with the filter', () => {
+            const emitter = new EventEmitter();
+
+            const listener1 = sinon.fake();
+            const listener2 = sinon.fake();
+
+            emitter.on('channel/sub',listener1);
+            emitter.on('channel/pub',listener1);
+            emitter.on('channel/unsub',listener1);
+            emitter.on('connect',listener2);
+
+            emitter.offEventsFilter(e => e.startsWith('channel/'));
+
+            emitter.emit('channel/sub');
+            emitter.emit('channel/pub');
+            emitter.emit('channel/unsub');
+            emitter.emit('connect');
+
+            sinon.assert.notCalled(listener1);
+            sinon.assert.calledOnce(listener2);
+        })
+
+    })
 })
