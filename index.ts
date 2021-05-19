@@ -38,7 +38,20 @@ function clearEvent(emitter: EventEmitter, event: string) {
     --emitter._eventCount === 0 ? (emitter._events = new Events(), emitter._eventCount = 0) : delete emitter._events[event];
 }
 
+class ProtectedEventEmitterEmit<T extends Events = any> {
+    /**
+     * @description
+     * Triggers an event with the given arguments.
+     * @param event
+     * @param args
+     */
+    protected emit<E extends keyof T>(event: E, ...args: T[E]) {}
+}
+type ProtectedEventEmitter<T extends Events = any> = (new () => Omit<EventEmitter<T>,"emit"> & ProtectedEventEmitterEmit<T>)
+
 export default class EventEmitter<T extends Events = any> {
+
+    public static Protected: <T extends Events = any>() => ProtectedEventEmitter<T> = EventEmitter as any;
 
     /**
      * @description
