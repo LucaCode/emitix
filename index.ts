@@ -51,7 +51,7 @@ type ProtectedEventEmitter<T extends Events = any> = (new () => Omit<EventEmitte
 
 export default class EventEmitter<T extends Events = any> {
 
-    public static Protected: <T extends Events = any>() => ProtectedEventEmitter<T> = EventEmitter as any;
+    public static Protected: <T extends Events = any>() => ProtectedEventEmitter<T> = () => EventEmitter as any;
 
     /**
      * @description
