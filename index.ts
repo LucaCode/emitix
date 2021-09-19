@@ -77,20 +77,20 @@ export default class EventEmitter<T extends Events = any> {
      * @description
      * Removes all listeners.
      */
-    public off()
+    public off(): void
     /**
      * @description
      * Removes all listeners of an event.
      * @param event
      */
-    public off<E extends keyof T>(event: E)
+    public off<E extends keyof T>(event: E): void
     /**
      * Removes a specific listener of an event.
      * @param event
      * @param listener
      */
-    public off<E extends keyof T>(event: E, listener: ListenerFunction<T[E]>)
-    public off(event?: string, fn?: ListenerFunction<any>) {
+    public off<E extends keyof T>(event: E, listener: ListenerFunction<T[E]>): void
+    public off(event?: string, fn?: ListenerFunction<any>): void {
         if(!event) this._events = new Events(), this._eventCount = 0;
         else if(!this._events[event!]) return;
         else if(!fn) return clearEvent(this,event)
@@ -120,7 +120,7 @@ export default class EventEmitter<T extends Events = any> {
      * @param event
      * @param listener
      */
-    public on<E extends keyof T>(event: E, listener: ListenerFunction<T[E]>)
+    public on<E extends keyof T>(event: E, listener: ListenerFunction<T[E]>): void
     public on<E extends keyof T>(event: E, fn: ListenerFunction<T[E]>): void {
         addEvent(this,event as string,new Listener(fn));
     }
@@ -163,8 +163,8 @@ export default class EventEmitter<T extends Events = any> {
      * @param args
      */
     // @ts-ignore
-    public emit<E extends keyof T>(event: E, ...args: T[E])
-    public emit<E extends keyof T>(event: E, a1, a2, a3, a4, a5) {
+    public emit<E extends keyof T>(event: E, ...args: T[E]): void
+    public emit<E extends keyof T>(event: E, a1, a2, a3, a4, a5): void {
         const lis: Listener | Listener[] | undefined | any = this._events[event], len = arguments.length;
         if(!lis) return;
         if(lis.fn) {
