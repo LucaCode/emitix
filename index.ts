@@ -29,7 +29,7 @@ function rmOnceListener(emitter: EventEmitter, event: string, listener: Listener
     if(!lis) return;
     else if(lis.fn && lis == listener) clearEvent(emitter,event)
     else {
-        for (let i = 0; i < lis.length; i++) if (lis[i] == listener) (lis as ListenerFunction<any>[]).splice(i, 1);
+        for (let i = lis.length - 1; i > -1; i--) if (lis[i] == listener) (lis as ListenerFunction<any>[]).splice(i, 1);
         if(lis.length === 0) clearEvent(emitter,event)
     }
 }
@@ -98,7 +98,7 @@ export default class EventEmitter<T extends Events = any> {
             const lis: Listener | Listener[] | undefined | any = this._events[event];
             if(lis.fn && lis.fn === fn) return clearEvent(this,event)
             else {
-                for (let i = 0; i < lis.length; i++) if (lis[i].fn == fn) (lis as ListenerFunction<any>[]).splice(i, 1);
+                for (let i = lis.length - 1; i > -1; i--) if (lis[i].fn == fn) (lis as ListenerFunction<any>[]).splice(i, 1);
                 if(lis.length === 0) clearEvent(this,event)
             }
         }
