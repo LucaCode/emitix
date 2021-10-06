@@ -85,6 +85,7 @@ export default class EventEmitter<T extends Events = any> {
      */
     public off<E extends keyof T>(event: E): void
     /**
+     * @description
      * Removes a specific listener of an event.
      * @param event
      * @param listener
@@ -105,6 +106,7 @@ export default class EventEmitter<T extends Events = any> {
     }
 
     /**
+     * @description
      * Removes all events that matches with the filter.
      * @param filter
      */
