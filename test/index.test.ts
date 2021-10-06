@@ -16,7 +16,7 @@ chai.should();
 
 describe('Emitix',() => {
 
-    describe('On',() => {
+    describe('on',() => {
 
         const testArgs = ([
             [],
@@ -57,7 +57,7 @@ describe('Emitix',() => {
 
     })
 
-    describe('Once',() => {
+    describe('once',() => {
 
         it('should trigger an once-listener only once', () => {
             const emitter = new EventEmitter<{error: [Error]}>();
@@ -110,7 +110,7 @@ describe('Emitix',() => {
         });
     })
 
-    describe('Off',() => {
+    describe('off',() => {
 
         const testData = ([
             ['should remove the listener from an event',(e,l) => e.off('connect',l)],
