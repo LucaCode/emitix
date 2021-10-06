@@ -116,6 +116,29 @@ export default class EventEmitter<T extends Events = any> {
 
     /**
      * @description
+     * Returns the count of active listeners.
+     * When an event is provided, it returns only
+     * the count of active listeners for this specific event.
+     * @param event
+     */
+    public getListenerCount<E extends keyof T>(event?: E): number {
+        if(event != null) {
+            const lis: Listener | Listener[] | undefined | any = this._events[event];
+            return !lis ? 0 : (lis.fn ? 1 : lis.length);
+        }
+        const events = Object.keys(this._events);
+        let lis: Listener | Listener[] | undefined | any,
+            count = 0, len = events.length, i = 0;
+        for(; i < len; i++) {
+            lis = this._events[events[i]];
+            if(!lis) continue;
+            count += lis.fn ? 1 : lis.length;
+        }
+        return count;
+    }
+
+    /**
+     * @description
      * Adds an on-listener to an event.
      * @param event
      * @param listener
