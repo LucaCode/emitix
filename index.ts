@@ -155,9 +155,9 @@ export default class EventEmitter<T extends Events = any> {
      * @description
      * Adds a once-listener to an event.
      * @param event
-     * @param fn
+     * @param listener
      */
-    public once<E extends keyof T>(event: E, fn: ListenerFunction<T[E]>): void
+    public once<E extends keyof T>(event: E, listener: ListenerFunction<T[E]>): void
     /**
      * @description
      * Returns a promise that will be resolved with the arguments when the event has triggered.
