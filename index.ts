@@ -189,39 +189,21 @@ export default class EventEmitter<T extends Events = any> {
      */
     // @ts-ignore
     public emit<E extends keyof T>(event: E, ...args: T[E]): void
-    public emit<E extends keyof T>(event: E, a1, a2, a3, a4, a5): void {
+    public emit<E extends keyof T>(event: E, a1, a2, a3): void {
         const lis: Listener | Listener[] | undefined | any = this._events[event], len = arguments.length;
         if(!lis) return;
         if(lis.fn) {
             if(lis.once) rmOnceListener(this,event as string,lis);
-            switch (len) {
-                case 1: return lis.fn();
-                case 2: return lis.fn(a1);
-                case 3: return lis.fn(a1,a2);
-                case 4: return lis.fn(a1,a2,a3);
-                case 5: return lis.fn(a1,a2,a3,a4);
-                case 6: return lis.fn(a1,a2,a3,a4,a5);
-            }
-            let i = 1, args = new Array(len -1);
-            for (; i < len; i++) args[i - 1] = arguments[i];
-            lis.fn.apply(null, args);
+            return len == 1 ? lis.fn() : len == 2 ? lis.fn(a1) : len == 3 ? lis.fn(a1,a2) : len == 4 ? lis.fn(a1,a2,a3) :
+                lis.fn.apply(null,Array.from(arguments).slice(1));
         }
         else {
-            let args, j, i = 0;
+            let args, i = 0, l;
             while(i < lis.length) {
-                switch (len) {
-                    case 1: lis[i].fn(); break;
-                    case 2: lis[i].fn(a1); break;
-                    case 3: lis[i].fn(a1,a2); break;
-                    case 4: lis[i].fn(a1,a2,a3); break;
-                    case 5: lis[i].fn(a1,a2,a3,a4); break;
-                    case 6: lis[i].fn(a1,a2,a3,a4,a5); break;
-                    default:
-                        if (!args) for (j = 1, args = new Array(len -1); j < len; j++) args[j - 1] = arguments[j];
-                        lis[i].fn.apply(null, args);
-                }
-                if(lis[i].once) rmOnceListener(this,event as string,lis[i]);
-                else i++;
+                l = lis[i];
+                l.once ? rmOnceListener(this,event as string,l) : i++;
+                len == 1 ? l.fn() : len == 2 ? l.fn(a1) : len == 3 ? l.fn(a1,a2) : len == 4 ? l.fn(a1,a2,a3) :
+                    l.fn.apply(null, args || (args = Array.from(arguments).slice(1)));
             }
         }
     }
