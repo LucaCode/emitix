@@ -199,32 +199,26 @@ describe('Emitix',() => {
         })
     })
 
-    describe('offEventsFilter',() => {
+    describe('events',() => {
 
-        it('should remove all events that matches with the filter', () => {
+        it('should return all currently registered events.', () => {
             const emitter = new EventEmitter();
 
-            const listener1 = sinon.fake();
-            const listener2 = sinon.fake();
+            emitter.once('channel/sub');
+            emitter.once('channel/pub');
 
-            emitter.on('channel/sub',listener1);
-            emitter.on('channel/pub',listener1);
-            emitter.on('channel/unsub',listener1);
-            emitter.on('connect',listener2);
+            chai.expect(emitter.events())
+                .to.be.deep.equal(['channel/sub','channel/pub'])
 
-            emitter.offEventsFilter(e => e.startsWith('channel/'));
+            emitter.once('channel/unsub');
+            emitter.on('connect', () => {});
 
-            emitter.emit('channel/sub');
-            emitter.emit('channel/pub');
-            emitter.emit('channel/unsub');
-            emitter.emit('connect');
-
-            sinon.assert.notCalled(listener1);
-            sinon.assert.calledOnce(listener2);
+            chai.expect(emitter.events())
+                .to.be.deep.equal(['channel/sub','channel/pub','channel/unsub','connect'])
         })
     })
 
-    describe('getListenerCount',() => {
+    describe('listenerCount',() => {
 
         it('should return the correct count of active listeners.', () => {
             const emitter = new EventEmitter();
