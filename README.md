@@ -70,7 +70,7 @@ groupEmitter.listenerCount();
 groupEmitter.listenerCount("join");
 ```
 
-### Protected class emitter
+### Protected class event emitter
 Use the Emitix event emitter with a class and let only the class trigger events internally.
 
 ```typescript
@@ -95,7 +95,9 @@ broker.emit("message","Hello from outside!");
 broker.on("message", message => {})
 ```
 
-## Performance comparisons
+## Performance comparison
+
+Results are from a MacBook Air M1, in Node.js Version: 16.13.0 LTS.
 
 
 
