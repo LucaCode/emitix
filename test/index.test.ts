@@ -239,5 +239,10 @@ describe('Emitix',() => {
             chai.expect(emitter.listenerCount()).to.be.equal(2);
         })
 
+        it('should return 0 by an unknown event.', () => {
+            chai.expect((new EventEmitter()).listenerCount('unknown'))
+                .to.be.equal(0);
+        })
+
     })
 })
