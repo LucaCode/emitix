@@ -230,19 +230,19 @@ describe('Emitix',() => {
             const emitter = new EventEmitter();
             const listener = () => {};
 
-            chai.expect(emitter.getListenerCount()).to.be.equal(0);
+            chai.expect(emitter.listenerCount()).to.be.equal(0);
 
             emitter.on('e1',listener);
             emitter.on('e1',listener);
             emitter.on('e2',listener);
 
-            chai.expect(emitter.getListenerCount()).to.be.equal(3);
-            chai.expect(emitter.getListenerCount('e2')).to.be.equal(1);
-            chai.expect(emitter.getListenerCount('e1')).to.be.equal(2);
+            chai.expect(emitter.listenerCount()).to.be.equal(3);
+            chai.expect(emitter.listenerCount('e2')).to.be.equal(1);
+            chai.expect(emitter.listenerCount('e1')).to.be.equal(2);
 
             emitter.off('e2',listener);
 
-            chai.expect(emitter.getListenerCount()).to.be.equal(2);
+            chai.expect(emitter.listenerCount()).to.be.equal(2);
         })
 
     })

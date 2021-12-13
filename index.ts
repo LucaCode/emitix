@@ -127,7 +127,7 @@ export default class EventEmitter<T extends Events = any> {
      * the count of active listeners for this specific event.
      * @param event
      */
-    public getListenerCount<E extends keyof T>(event?: E): number {
+    public listenerCount<E extends keyof T>(event?: E): number {
         if(event != null) {
             const lis: Listener | Listener[] | undefined | any = this._events[event];
             return !lis ? 0 : (lis.fn ? 1 : lis.length);
