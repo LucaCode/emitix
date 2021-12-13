@@ -1,12 +1,13 @@
 {
   "name": "emitix",
   "version": "1.2.0",
-  "description": "Fast, powerful, modern and lightweight EventEmitter.",
+  "description": "Fast, powerful, modern, typed and lightweight EventEmitter.",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist/**/*"
+    "dist/**/*",
+    "!.DS_Store"
   ],
   "devDependencies": {
     "typescript": "^4.5.3",
@@ -33,15 +34,28 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/LucaCode/emitix.git"
+    "url": "https://github.com/LucaCode/emitix.git"
   },
   "author": {
-    "name": "Luca Scaringella",
-    "email": "lucacode1@gmail.com",
-    "url": "https://luca.scaringella.de"
+    "name": "Ing. Luca Gian Scaringella",
+    "email": "lucacode1@gmail.com"
   },
   "bugs": {
     "url": "https://github.com/LucaCode/emitix/issues"
   },
-  "homepage": "https://github.com/LucaCode/emitix#readme"
+  "homepage": "https://github.com/LucaCode/emitix#readme",
+  "keywords": [
+    "event emitter",
+    "events",
+    "typed",
+    "modern",
+    "promise",
+    "fast",
+    "lightweight",
+    "emitter",
+    "emitix",
+    "listener",
+    "performance",
+    "powerful"
+  ]
 }
