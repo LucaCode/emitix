@@ -111,13 +111,10 @@ export default class EventEmitter<T extends Events = any> {
 
     /**
      * @description
-     * Removes all events that matches with the filter.
-     * @param filter
+     * Returns currently registered event names.
      */
-    public offEventsFilter(filter: (event: string) => boolean): void {
-        const events = Object.keys(this._events);
-        for(let i = 0, len = events.length; i < len; i++)
-            if(filter(events[i])) clearEvent(this,events[i]);
+    public events(): string[] {
+        return Object.keys(this._events);
     }
 
     /**
