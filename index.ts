@@ -42,7 +42,7 @@ function clearEvent(emitter: EventEmitter, event: string) {
     --emitter._eventCount === 0 ? (emitter._events = new Events(), emitter._eventCount = 0) : delete emitter._events[event];
 }
 
-class ProtectedEventEmitterEmit<T extends Events = any> {
+export class ProtectedEventEmitterEmit<T extends Events = any> {
     /**
      * @description
      * Triggers an event with the given arguments.
