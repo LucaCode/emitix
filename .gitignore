@@ -5,4 +5,4 @@ coverage/
 .idea/
 dist/
 benchmarks/node_modules
-safe-direct-listeners-manipulation-version.ts
+safe-direct-listeners-manipulation-version
