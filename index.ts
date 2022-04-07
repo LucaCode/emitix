@@ -28,12 +28,15 @@ function addEvent(emitter: EventEmitter,event: string, listener: Listener) {
     else emitter._events[event] = [emitter._events[event] as Listener,listener];
 }
 
-function rmOnceListener(emitter: EventEmitter, event: string, listener: Listener) {
+function rmFirstListenerInstance(emitter: EventEmitter, event: string, listener: Listener) {
     const lis: Listener | Listener[] | undefined | any = emitter._events[event];
     if(!lis) return;
     else if(lis.fn && lis == listener) clearEvent(emitter,event)
     else {
-        for (let i = lis.length - 1; i > -1; i--) if (lis[i] == listener) (lis as ListenerFunction<any>[]).splice(i, 1);
+        for (let i = lis.length - 1; i > -1; i--) if (lis[i] == listener) {
+            (lis as ListenerFunction<any>[]).splice(i, 1);
+            break;
+        }
         if(lis.length === 0) clearEvent(emitter,event)
     }
 }
@@ -171,7 +174,7 @@ export default class EventEmitter<T extends Events = any> {
         if(v) return new Promise((res,rej) => {
             let listener;
             const timeout = setTimeout(() => {
-                rmOnceListener(this,event,listener);
+                rmFirstListenerInstance(this,event,listener);
                 rej(EventEmitter.onceTimeoutErrorCreator());
             },v);
             addEvent(this,event,listener = new Listener(function() {
@@ -194,7 +197,7 @@ export default class EventEmitter<T extends Events = any> {
         const lis: Listener | Listener[] | undefined | any = this._events[event], len = arguments.length;
         if(!lis) return;
         if(lis.fn) {
-            if(lis.once) rmOnceListener(this,event as string,lis);
+            if(lis.once) clearEvent(this,event as string);
             return len == 1 ? lis.fn() : len == 2 ? lis.fn(a1) : len == 3 ? lis.fn(a1,a2) : len == 4 ? lis.fn(a1,a2,a3) :
                 lis.fn.apply(null,Array.from(arguments).slice(1));
         }
@@ -202,7 +205,11 @@ export default class EventEmitter<T extends Events = any> {
             let args, i = 0, l;
             while(i < lis.length) {
                 l = lis[i];
-                l.once ? rmOnceListener(this,event as string,l) : i++;
+                if(l.once) {
+                    lis.splice(i, 1);
+                    if(lis.length === 0) clearEvent(this,event as string);
+                }
+                else i++;
                 len == 1 ? l.fn() : len == 2 ? l.fn(a1) : len == 3 ? l.fn(a1,a2) : len == 4 ? l.fn(a1,a2,a3) :
                     l.fn.apply(null, args || (args = Array.from(arguments).slice(1)));
             }
