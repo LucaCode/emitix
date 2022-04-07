@@ -193,6 +193,23 @@ describe('Emitix',() => {
             sinon.assert.calledOnce(listener1);
         })
 
+        it('Should remove listener in listener without skipping next listener', () => {
+            const emitter = new EventEmitter<{'connect':[]}>();
+
+            const listener1 = sinon.fake(() => {
+                emitter.off('connect',listener1);
+            });
+            const listener2 = sinon.fake();
+
+            emitter.on('connect',listener1);
+            emitter.on('connect',listener2);
+
+            emitter.emit('connect');
+
+            sinon.assert.calledOnce(listener1);
+            sinon.assert.calledOnce(listener2);
+        })
+
         it('Should not throw an error when removing a not existing event', () => {
             const emitter = new EventEmitter<{'connect':[]}>();
             chai.expect(() => emitter.off('connect')).to.not.throw();
