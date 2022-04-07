@@ -106,8 +106,11 @@ export default class EventEmitter<T extends Events = any> {
             const lis: Listener | Listener[] | undefined | any = this._events[event];
             if(lis.fn && lis.fn === fn) return clearEvent(this,event)
             else {
-                for (let i = lis.length - 1; i > -1; i--) if (lis[i].fn == fn) (lis as ListenerFunction<any>[]).splice(i, 1);
-                if(lis.length === 0) clearEvent(this,event)
+                const newLis: Listener[] = [];
+                for (let i = 0, length = lis.length; i < length; i++)
+                    if (lis[i].fn != fn) newLis.push(lis[i]);
+                if(newLis.length) this._events[event] = newLis.length === 1 ? newLis[0]! : newLis;
+                else clearEvent(this,event);
             }
         }
     }
