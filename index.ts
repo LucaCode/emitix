@@ -171,7 +171,7 @@ export default class EventEmitter<T extends Events = any> {
         if(v) return new Promise((res,rej) => {
             let listener;
             const timeout = setTimeout(() => {
-                rmOnceListener(this,listener,listener);
+                rmOnceListener(this,event,listener);
                 rej(EventEmitter.onceTimeoutErrorCreator());
             },v);
             addEvent(this,event,listener = new Listener(function() {
