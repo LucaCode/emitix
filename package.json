@@ -1,6 +1,6 @@
 {
   "name": "emitix",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "High performance, modern, lightweight, and typesafe EventEmitter.",
   "license": "MIT",
   "main": "dist/index.js",
