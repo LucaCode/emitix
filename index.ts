@@ -54,11 +54,13 @@ class ProtectedEventEmitterEmit<T extends Events = any> {
      */
     protected emit<E extends keyof T>(event: E, ...args: T[E]) {}
 }
-export type ProtectedEventEmitter<T extends Events = any> = (new () => Omit<EventEmitter<T>,"emit"> & ProtectedEventEmitterEmit<T>)
 
+export namespace EventEmitter {
+    export type Protected<T extends Events = any> = Omit<EventEmitter<T>,"emit"> & ProtectedEventEmitterEmit<T>;
+}
 export class EventEmitter<T extends Events = any> {
 
-    public static Protected: <T extends Events = any>() => ProtectedEventEmitter<T> = () => EventEmitter as any;
+    public static Protected: <T extends Events = any>() => (new () => EventEmitter.Protected<T>) = () => EventEmitter as any;
 
     /**
      * @description
