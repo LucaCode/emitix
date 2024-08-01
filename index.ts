@@ -5,7 +5,7 @@ Copyright(c) Ing. Luca Gian Scaringella
  */
 
 type ListenerFunction<T extends any[]> = (...args: T) => any;
-type Events = {[key: string]: any[]};
+export type Events = {[key: string]: any[]};
 
 type EventEmitterEvents<T extends EventEmitter<any>> = T extends EventEmitter<infer E> ? E : never;
 export type EventListener<T extends EventEmitter<any>,E extends keyof EventEmitterEvents<T>>
