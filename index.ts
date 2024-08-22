@@ -61,7 +61,7 @@ export namespace EventEmitter {
 }
 export class EventEmitter<T extends Events = any> {
 
-    public static Protected: new <T extends Events = any>() => EventEmitter.Protected<T> = (() => EventEmitter) as any;
+    public static Protected: new <T extends Events = any>() => EventEmitter.Protected<T> = EventEmitter as any;
 
     /**
      * @description
